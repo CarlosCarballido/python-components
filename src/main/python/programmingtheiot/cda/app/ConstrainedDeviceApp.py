@@ -14,6 +14,8 @@ import logging
 
 from time import sleep
 
+from programmingtheiot.cda.app.DeviceDataManager import DeviceDataManager
+
 logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 
 class ConstrainedDeviceApp():
@@ -28,31 +30,31 @@ class ConstrainedDeviceApp():
 		
 		@param path The name of the resource to apply to the URI.
 		"""
-		logging.info("Initializing CDA...")
+		logging.info("[CDA] Initializing CDA...")
 		
-		# TODO: implementation here
+		self.deviceDataManager = DeviceDataManager()
 
 	def startApp(self):
 		"""
 		Start the CDA. Calls startManager() on the device data manager instance.
 		
 		"""
-		logging.info("Starting CDA...")
+		logging.info("[CDA] Starting CDA...")
 		
-		# TODO: implementation here
+		self.deviceDataManager.startManager()
 		
-		logging.info("CDA started.")
+		logging.info("[CDA] CDA started.")
 
 	def stopApp(self, code: int):
 		"""
 		Stop the CDA. Calls stopManager() on the device data manager instance.
 		
 		"""
-		logging.info("CDA stopping...")
+		logging.info("[CDA] CDA stopping...")
 		
-		# TODO: implementation here
+		self.deviceDataManager.stopManager()
 		
-		logging.info("CDA stopped with exit code %s.", str(code))
+		logging.info("[CDA] CDA stopped with exit code %s.", str(code))
 		
 	def parseArgs(self, args):
 		"""
@@ -60,7 +62,7 @@ class ConstrainedDeviceApp():
 		
 		@param args The arguments to parse.
 		"""
-		logging.info("Parsing command line args...")
+		logging.info("[CDA] Parsing command line args...")
 
 
 def main():
