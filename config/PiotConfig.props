@@ -77,3 +77,10 @@ streamFps           =   30
 imageFileExt        = .png
 videoFileExt        = .avi
 minMotionPixelsDiff = 10000
+
+[SensorData]
+hSimFloor = 0.5
+
+[SystemPerformance]
+cpuUtilThreshold = 0.75
+memUtilThreshold = 0.80
