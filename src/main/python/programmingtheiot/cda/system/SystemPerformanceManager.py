@@ -57,19 +57,7 @@ class SystemPerformanceManager(object):
 		pass
 
 	def startManager(self):
-		logging.info("Starting SystemPerformanceManager...")
-
-		if not self.scheduler.running:
-			self.scheduler.start()
-			logging.info("Started SystemPerformanceManager.")
-		else:
-			logging.warning("SystemPerformanceManager scheduler already started. Ignoring.")
+		logging.info("Started SystemPerformanceManager.")
 
 	def stopManager(self):
-		logging.info("Stopping SystemPerformanceManager...")
-
-		try:
-			self.scheduler.shutdown()
-			logging.info("Stopped SystemPerformanceManager.")
-		except:
-			logging.warning("SystemPerformanceManager scheduler already stopped. Ignoring.")
+		logging.info("Stopped SystemPerformanceManager.")
