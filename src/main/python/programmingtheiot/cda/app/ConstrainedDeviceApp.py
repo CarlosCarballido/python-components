@@ -64,26 +64,13 @@ class ConstrainedDeviceApp():
 		"""
 		logging.info("[CDA] Parsing command line args...")
 
-
 def main():
-	"""
-	Main function definition for running client as application.
-	
-	Current implementation runs for 35 seconds then exits.
-	"""
-	cda = ConstrainedDeviceApp()
-	cda.startApp()
-	
-	# run for 10 seconds - this can be changed as needed
-	sleep(10)
-	
-	# optionally stop the app - this can be removed if needed
-	cda.stopApp(0)
+    cda = ConstrainedDeviceApp()
+    cda.startApp()
+
+    sleep(65)
+
+    cda.stopApp()
 
 if __name__ == '__main__':
-	"""
-	Attribute definition for when invoking as app via command line
-	
-	"""
-	main()
-	
+    main()
