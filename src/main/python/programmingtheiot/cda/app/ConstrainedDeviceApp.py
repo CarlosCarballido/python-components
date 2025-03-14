@@ -53,12 +53,12 @@ class ConstrainedDeviceApp():
 		logging.info("[CDA] Parsing command line args...")
 
 def main():
-    cda = ConstrainedDeviceApp()
-    cda.startApp()
+	cda = ConstrainedDeviceApp()
+	cda.startApp()
 
-    sleep(65)
+	sleep(65)
 
-    cda.stopApp()
+	cda.stopApp()
 
 if __name__ == '__main__':
-    main()
+	main()
