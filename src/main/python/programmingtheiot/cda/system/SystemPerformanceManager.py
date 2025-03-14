@@ -21,6 +21,8 @@ from programmingtheiot.cda.system.SystemMemUtilTask import SystemMemUtilTask
 
 from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 class SystemPerformanceManager(object):
 	"""
 	Shell representation of class for student implementation.
@@ -31,12 +33,14 @@ class SystemPerformanceManager(object):
 		configUtil = ConfigUtil()
 
 		self.pollRate = \
-			configUtil.getInteger( \
-				section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.POLL_CYCLES_KEY, defaultVal = ConfigConst.DEFAULT_POLL_CYCLES)
+            configUtil.getInteger(
+                section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.POLL_CYCLES_KEY, 
+                defaultVal=ConfigConst.DEFAULT_POLL_CYCLES)
 
 		self.locationID = \
-			configUtil.getProperty( \
-				section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.DEVICE_LOCATION_ID_KEY, defaultVal = ConfigConst.NOT_SET)
+            configUtil.getProperty(
+                section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.DEVICE_LOCATION_ID_KEY, 
+                defaultVal=ConfigConst.NOT_SET)
 
 		if self.pollRate <= 0:
 			self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
