@@ -44,13 +44,18 @@ enableMqttClient = True
 enableCoapServer = False
 enableCoapClient = False
 enableSystemPerformance = True
-enableSensing    = False
+enableSensing    = True
 enableLogging    = True
 pollCycleSecs    = 5
 testGdaDataPath  = /tmp/gda-data
 testCdaDataPath  = /tmp/cda-data
 testEmptyApp     = False
 enableSimulator = True
+
+# NOTE: Choose the values most appropriate for your implementation
+handleTempChangeOnDevice = True
+triggerHvacTempFloor     = 18.0
+triggerHvacTempCeiling   = 20.0
 
 # configurable limits for sensor simulation
 humiditySimFloor   =   35.0
