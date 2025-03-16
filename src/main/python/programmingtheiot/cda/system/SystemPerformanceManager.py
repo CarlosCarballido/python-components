@@ -45,16 +45,29 @@ class SystemPerformanceManager(object):
 		if self.pollRate <= 0:
 			self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
 
-		self.dataMsgListener = None
+		self.cpuUtilTask = SystemCpuUtilTask()
+		self.memUtilTask = SystemMemUtilTask()
+  
+def handleTelemetry(self):
+	self.cpuUtilPct = self.cpuUtilTask.getTelemetryValue()
+	self.memUtilPct = self.memUtilTask.getTelemetryValue()
 
-	def handleTelemetry(self):
-		cpuUtilPct=self.cpuUtilTask.getTelemetryValue()
-		memUtilPct=self.memUtilTask.getTelemetryValue()
+	logging.debug('CPU utilization is %s percent, and memory utilization is %s percent.', str(self.cpuUtilPct), str(self.memUtilPct))
 
-		logging.debug('CPU utilization is %s percent, and memory utilization is %s percent.',str(cpuUtilPct),str(memUtilPct))
-		
-	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
-		pass
+	sysPerfData = SystemPerformanceData()
+	sysPerfData.setLocationID(self.locationID)
+	sysPerfData.setCpuUtilization(self.cpuUtilPct)
+	sysPerfData.setMemoryUtilization(self.memUtilPct)
+
+	if self.dataMsgListener:
+		self.dataMsgListener.handleSystemPerformanceMessage(data=sysPerfData)
+
+	if self.dataMsgListener:
+		self.dataMsgListener.handleSystemPerformanceMessage(data=sysPerfData)
+
+def setDataMessageListener(self,listener:IDataMessageListener)->bool:
+	if listener:
+		self.dataMsgListener=listener
 
 	def startManager(self):
 		logging.info("Started SystemPerformanceManager.")
