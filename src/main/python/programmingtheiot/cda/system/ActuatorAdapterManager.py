@@ -47,18 +47,39 @@ class ActuatorAdapterManager(object):
 		self.humidifierActuator = None
 		self.hvacActuator       = None
 		self.ledDisplayActuator = None
+  
+		# load the HVAC actuation emulator (you can use either `import_module()` as shown, or `__import__()`)
+		hvacModule=import_module('programmingtheiot.cda.emulated.HvacEmulatorTask','HvacEmulatorTask')
+		hveClazz=getattr(hvacModule ,'HvacEmulatorTask')
+		self.hvacAdapter=hveClazz()
 
 		# see PIOT-CDA-03-007 description for thoughts on the next line of code
 		self._initEnvironmentalActuationTasks()
 
-	def _initEnvironmentalActuationTasks(self):
-		if not self.useEmulator:
-			# load the environmental tasks for simulated actuation
-			self.humidifierActuator = HumidifierActuatorSimTask()
-
-			# create the HVAC actuator
-			self.hvacActuator = HvacActuatorSimTask()
+		def _initEnvironmentalActuationTasks(self):
+			if not self.useEmulator:
+				# load the environmental tasks for simulated actuation
+				self.humidifierActuator = HumidifierActuatorSimTask()
 	
+				# create the HVAC actuator
+				self.hvacActuator = HvacActuatorSimTask()
+			else:
+				# load the environmental tasks for emulated actuation
+				hueModule = import_module('programmingtheiot.cda.emulated.HumidifierEmulatorTask', 'HumidifierEmulatorTask')
+				hueClazz = getattr(hueModule, 'HumidifierEmulatorTask')
+				self.humidifierActuator = hueClazz()
+	
+			# create the HVAC actuator emulator
+			hveModule = import_module('programmingtheiot.cda.emulated.HvacEmulatorTask', 'HvacEmulatorTask')
+			hveClazz = getattr(hveModule, 'HvacEmulatorTask')
+			self.hvacActuator = hveClazz()
+	
+			# create the LED display actuator emulator
+			leDisplayModule = import_module('programmingtheiot.cda.emulated.LedDisplayEmulatorTask', 'LedDisplayEmulatorTask')
+			leClazz = getattr(leDisplayModule, 'LedDisplayEmulatorTask')
+			self.ledDisplayActuator = leClazz()
+			
+ 
 	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
 		if listener:
 			self.dataMsgListener = listener
