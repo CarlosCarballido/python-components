@@ -10,7 +10,7 @@
 import logging
 import random
 
-from main.python.programmingtheiot.common import ConfigConst
+from programmingtheiot.common import ConfigConst
 from programmingtheiot.data.ActuatorData import ActuatorData
 from programmingtheiot.cda.sim.BaseActuatorSimTask import BaseActuatorSimTask
 
