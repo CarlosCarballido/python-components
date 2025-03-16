@@ -85,6 +85,42 @@ class DataUtil():
 
 		jsonData = self._generateJsonData(obj=data, useDecForFloat=useDecForFloat)
 		return jsonData
+
+	def sensorDataToJson(self, sensor_data_obj):
+		"""
+		Convierte un objeto SensorData a una cadena JSON.
+		"""
+		try:
+			return json.dumps(sensor_data_obj.__dict__)
+		except Exception as e:
+			print("Error al convertir SensorData a JSON:", e)
+			return None
+
+	def jsonToSensorData(self, jsonStr):
+		"""
+		Convierte una cadena JSON a un objeto SensorData.
+		"""
+		try:
+			data = json.loads(jsonStr)
+			sensorDataObj = SensorData()  # Asegúrate de que SensorData esté importado correctamente.
+			sensorDataObj.__dict__.update(data)
+			return sensorDataObj
+		except Exception as e:
+			print("Error al convertir JSON a SensorData:", e)
+			return None
+
+	def jsonToSystemPerformanceData(self, jsonStr):
+		"""
+		Convierte una cadena JSON a un objeto SystemPerformanceData.
+		"""
+		try:
+			data = json.loads(jsonStr)
+			sysPerfObj = SystemPerformanceData()  # Asegúrate de importar SystemPerformanceData.
+			sysPerfObj.__dict__.update(data)
+			return sysPerfObj
+		except Exception as e:
+			print("Error al convertir JSON a SystemPerformanceData:", e)
+			return None
         
 
 class JsonDataEncoder(JSONEncoder):
