@@ -14,74 +14,47 @@ import logging
 
 from time import sleep
 
+import programmingtheiot.common.ConfigConst as ConfigConst
+
+from programmingtheiot.common.ConfigUtil import ConfigUtil
+from programmingtheiot.cda.app.DeviceDataManager import DeviceDataManager
+
 logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 
 class ConstrainedDeviceApp():
-	"""
-	Definition of the ConstrainedDeviceApp class.
-	
-	"""
-	
 	def __init__(self):
-		"""
-		Initialization of class.
-		
-		@param path The name of the resource to apply to the URI.
-		"""
 		logging.info("Initializing CDA...")
-		
-		# TODO: implementation here
+
+		self.dataMgr = DeviceDataManager()
 
 	def startApp(self):
-		"""
-		Start the CDA. Calls startManager() on the device data manager instance.
-		
-		"""
 		logging.info("Starting CDA...")
-		
-		# TODO: implementation here
-		
+
+		self.dataMgr.startManager()
+
 		logging.info("CDA started.")
 
 	def stopApp(self, code: int):
-		"""
-		Stop the CDA. Calls stopManager() on the device data manager instance.
-		
-		"""
 		logging.info("CDA stopping...")
-		
-		# TODO: implementation here
-		
-		logging.info("CDA stopped with exit code %s.", str(code))
-		
-	def parseArgs(self, args):
-		"""
-		Parse command line args.
-		
-		@param args The arguments to parse.
-		"""
-		logging.info("Parsing command line args...")
 
+		self.dataMgr.stopManager()
+
+		logging.info("CDA stopped with exit code %s.", str(code))
 
 def main():
-	"""
-	Main function definition for running client as application.
-	
-	Current implementation runs for 35 seconds then exits.
-	"""
 	cda = ConstrainedDeviceApp()
 	cda.startApp()
-	
-	# run for 10 seconds - this can be changed as needed
-	sleep(10)
-	
-	# optionally stop the app - this can be removed if needed
-	cda.stopApp(0)
+
+	runForever = ConfigUtil().getBoolean(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.RUN_FOREVER_KEY)
+
+	if runForever:
+		while (True):
+			sleep(5)
+
+	else:
+		# TODO: Make the '65' value configurable
+		sleep(65)
+		cda.stopApp(0)
 
 if __name__ == '__main__':
-	"""
-	Attribute definition for when invoking as app via command line
-	
-	"""
 	main()
-	

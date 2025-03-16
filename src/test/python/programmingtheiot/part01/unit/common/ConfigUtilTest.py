@@ -29,8 +29,8 @@ class ConfigUtilTest(unittest.TestCase):
 	#  - EmptyTestConfig.props
 	#  - InvalidTestConfig.props
 	#  - None (which will default to ./config/PiotConfig.props)
-	configFile = "./ValidTestConfig.props"
-	
+	configFile = '/home/carlos/PIC/python-components/src/test/python/programmingtheiot/part01/unit/common/ValidTestConfig.props'
+
 	@classmethod
 	def setUpClass(self):
 		logging.basicConfig(format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s', level = logging.DEBUG)

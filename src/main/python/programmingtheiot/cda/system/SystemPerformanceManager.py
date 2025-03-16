@@ -21,6 +21,8 @@ from programmingtheiot.cda.system.SystemMemUtilTask import SystemMemUtilTask
 
 from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 class SystemPerformanceManager(object):
 	"""
 	Shell representation of class for student implementation.
@@ -28,16 +30,34 @@ class SystemPerformanceManager(object):
 	"""
 
 	def __init__(self):
-		pass
+		configUtil = ConfigUtil()
+
+		self.pollRate = \
+            configUtil.getInteger(
+                section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.POLL_CYCLES_KEY, 
+                defaultVal=ConfigConst.DEFAULT_POLL_CYCLES)
+
+		self.locationID = \
+            configUtil.getProperty(
+                section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.DEVICE_LOCATION_ID_KEY, 
+                defaultVal=ConfigConst.NOT_SET)
+
+		if self.pollRate <= 0:
+			self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
+
+		self.dataMsgListener = None
 
 	def handleTelemetry(self):
-		pass
+		cpuUtilPct=self.cpuUtilTask.getTelemetryValue()
+		memUtilPct=self.memUtilTask.getTelemetryValue()
+
+		logging.debug('CPU utilization is %s percent, and memory utilization is %s percent.',str(cpuUtilPct),str(memUtilPct))
 		
 	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
 		pass
-	
+
 	def startManager(self):
-		pass
-		
+		logging.info("Started SystemPerformanceManager.")
+
 	def stopManager(self):
-		pass
+		logging.info("Stopped SystemPerformanceManager.")
