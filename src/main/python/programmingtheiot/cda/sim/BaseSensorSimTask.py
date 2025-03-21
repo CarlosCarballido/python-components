@@ -22,17 +22,22 @@ class BaseSensorSimTask():
 	
 	"""
 
-	DEFAULT_MIN_VAL=ConfigConst.DEFAULT_VAL
-	DEFAULT_MAX_VAL=100.0
+	DEFAULT_MIN_VAL = 0.0
+	DEFAULT_MAX_VAL = 1000.0
 	
-	def __init__(self, name: str = ConfigConst.NOT_SET, typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE, dataSet: SensorDataSet = None, minVal: float = DEFAULT_MIN_VAL, maxVal: float = DEFAULT_MAX_VAL):
-		self.dataSet=dataSet
-		self.name=name
-		self.typeID=typeID
-		self.dataSetIndex=0
-		self.useRandomizer=False
+	def __init__(self, name: str = ConfigConst.NOT_SET, 
+			  typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE, 
+			  dataSet: SensorDataSet = None, 
+			  minVal: float = DEFAULT_MIN_VAL, 
+			  maxVal: float = DEFAULT_MAX_VAL):
+		
+		self.dataSet = dataSet
+		self.name = name
+		self.typeID = typeID
+		self.dataSetIndex = 0
+		self.useRandomizer = False
 
-		self.latestSensorData=None
+		self.latestSensorData = None
 
 		if not self.dataSet:
 			self.useRandomizer = True
@@ -40,6 +45,12 @@ class BaseSensorSimTask():
 			self.maxVal = maxVal
 	
 	def generateTelemetry(self) -> SensorData:
+		"""
+		Implement basic logging and SensorData creation. Sensor-specific functionality
+		should be implemented by sub-class.
+		
+		A local reference to SensorData can be contained in this base class.
+		"""
 		sensorData = SensorData(typeID=self.getTypeID(), name=self.getName())
 		sensorVal = ConfigConst.DEFAULT_VAL
 
@@ -47,11 +58,13 @@ class BaseSensorSimTask():
 			sensorVal = random.uniform(self.minVal, self.maxVal)
 		else:
 			sensorVal = self.dataSet.getDataEntry(index=self.dataSetIndex)
-			self.dataSetIndex = self.dataSetIndex + 1
+			self.dataSetIndex = self.dataSetIndex+1
 
+			# FIXME este if es anidado?
 			if self.dataSetIndex >= self.dataSet.getDataEntryCount() - 1:
 				self.dataSetIndex = 0
 
+		# TODO esto va dentro o fuera del if??
 		sensorData.setValue(sensorVal)
 
 		self.latestSensorData = sensorData
