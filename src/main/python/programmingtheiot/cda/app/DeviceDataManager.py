@@ -8,7 +8,6 @@
 #
 
 import logging
-
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.cda.connection.CoapClientConnector import CoapClientConnector
@@ -18,18 +17,16 @@ from programmingtheiot.cda.system.ActuatorAdapterManager import ActuatorAdapterM
 from programmingtheiot.cda.system.SensorAdapterManager import SensorAdapterManager
 from programmingtheiot.cda.system.SystemPerformanceManager import SystemPerformanceManager
 
+from programmingtheiot.common.ConfigUtil import ConfigUtil
 from programmingtheiot.common.IDataMessageListener import IDataMessageListener
 from programmingtheiot.common.ISystemPerformanceDataListener import ISystemPerformanceDataListener
 from programmingtheiot.common.ITelemetryDataListener import ITelemetryDataListener
 from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
 
+from programmingtheiot.data.DataUtil import DataUtil
 from programmingtheiot.data.ActuatorData import ActuatorData
 from programmingtheiot.data.SensorData import SensorData
 from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
-
-from programmingtheiot.common.ConfigUtil import ConfigUtil
-
-from programmingtheiot.data.DataUtil import DataUtil
 
 class DeviceDataManager(IDataMessageListener):
 	"""
@@ -59,6 +56,12 @@ class DeviceDataManager(IDataMessageListener):
 		self.mqttClient         = None
 		self.coapClient         = None
 		self.coapServer         = None
+
+		self.enableMqttClient = \
+			self.configUtil.getBoolean( \
+				section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_MQTT_CLIENT_KEY)
+
+		self.mqttClient = None
 
 		if self.enableSystemPerf:
 			self.sysPerfMgr = SystemPerformanceManager()
@@ -113,7 +116,7 @@ class DeviceDataManager(IDataMessageListener):
 		"""
 		pass
 	
-	def handleActuatorCommandMessage(self, data: ActuatorData) -> bool:
+	def handleActuatorCommandMessage(self, data: ActuatorData) -> ActuatorData:
 		"""
 		This callback method will be invoked by the connection that's handling
 		an incoming ActuatorData command message.
@@ -121,7 +124,14 @@ class DeviceDataManager(IDataMessageListener):
 		@param data The incoming ActuatorData command message.
 		@return boolean
 		"""
-		pass
+		logging.info("Actuator data: " + str(data))
+
+		if data:
+			logging.info("Processing actuator command message.")
+			return self.actuatorAdapterMgr.sendActuatorCommand(data)
+		else:
+			logging.warning("Incoming actuator command is invalid (null). Ignoring.")
+			return None
 	
 	def handleActuatorCommandResponse(self, data: ActuatorData) -> bool:
 		"""
@@ -132,7 +142,24 @@ class DeviceDataManager(IDataMessageListener):
 		@param data The incoming ActuatorData response message.
 		@return boolean
 		"""
-		pass
+		if data:
+			logging.debug("Incoming actuator response received (from actuator manager): " + str(data))
+
+			# store the data in the cache
+			self.actuatorResponseCache[data.getName()] = data
+
+			# convert ActuatorData to JSON and get the msg resource
+			actuatorMsg = DataUtil().actuatorDataToJson(data)
+			resourceName = ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE
+
+			# delegate to the transmit function any potential upstream comm's
+			self._handleUpstreamTransmission(resource = resourceName, msg = actuatorMsg)
+
+			return True
+		else:
+			logging.warning("Incoming actuator response is invalid (null). Ignoring.")
+
+			return False
 	
 	def handleIncomingMessage(self, resourceEnum: ResourceNameEnum, msg: str) -> bool:
 		"""
@@ -154,7 +181,13 @@ class DeviceDataManager(IDataMessageListener):
 		@param data The incoming SensorData message.
 		@return boolean
 		"""
-		pass
+		if data:
+			logging.debug("Incoming sensor data received (from sensor manager): " + str(data))
+			self._handleSensorDataAnalysis(data)
+			return True
+		else:
+			logging.warning("Incoming sensor data is invalid (null). Ignoring.")
+			return False
 	
 	def handleSystemPerformanceMessage(self, data: SystemPerformanceData) -> bool:
 		"""
@@ -165,8 +198,13 @@ class DeviceDataManager(IDataMessageListener):
 		@param data The incoming SystemPerformanceData message.
 		@return boolean
 		"""
-		pass
-	
+		if data:
+			logging.debug("Incoming system performance message received (from sys perf manager): " + str(data))
+			return True
+		else:
+			logging.warning("Incoming system performance data is invalid (null). Ignoring.")
+			return False
+		
 	def setSystemPerformanceDataListener(self, listener: ISystemPerformanceDataListener = None):
 		pass
 			
@@ -182,6 +220,11 @@ class DeviceDataManager(IDataMessageListener):
 		if self.sensorAdapterMgr:
 			self.sensorAdapterMgr.startManager()
 
+		if self.mqttClient:
+			self.mqttClient.connectClient()
+			self.mqttClient.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, callback=None, qos=ConfigConst.DEFAULT_QOS)
+
+
 		logging.info("Started DeviceDataManager.")
 		
 	def stopManager(self):
@@ -192,6 +235,10 @@ class DeviceDataManager(IDataMessageListener):
 
 		if self.sensorAdapterMgr:
 			self.sensorAdapterMgr.stopManager()
+
+		if self.mqttClient:
+			self.mqttClient.unsubscribeFromTopic(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE)
+			self.mqttClient.disconnectClient()
 
 		logging.info("Stopped DeviceDataManager.")
 		
@@ -205,28 +252,34 @@ class DeviceDataManager(IDataMessageListener):
 		"""
 		pass
 		
-		def _handleSensorDataAnalysis(self, resource = None, data: SensorData = None):
-			if self.handleTempChangeOnDevice and data.getTypeID() == ConfigConst.TEMP_SENSOR_TYPE:
-				logging.info("Handle temp change: %s - type ID: %s", str(self.handleTempChangeOnDevice), str(data.getTypeID()))
+	def _handleSensorDataAnalysis(self, resource = None, data: SensorData = None):
+		"""
+		Call this from handleSensorMessage() to determine if there's
+		any action to take on the message. Steps to take:
+		1) Check config: Is there a rule or flag that requires immediate processing of data?
+		2) Act on data: If # 1 is true, determine what - if any - action is required, and execute.
+		"""
+		if self.handleTempChangeOnDevice and data.getTypeID() == ConfigConst.TEMP_SENSOR_TYPE:
+			logging.info("Handle temp change: %s - type ID: %s", str(self.handleTempChangeOnDevice), str(data.getTypeID()))
 
-				ad = ActuatorData(typeID = ConfigConst.HVAC_ACTUATOR_TYPE)
+			ad = ActuatorData(typeID = ConfigConst.HVAC_ACTUATOR_TYPE)
 
-				if data.getValue() > self.triggerHvacTempCeiling:
-					ad.setCommand(ConfigConst.COMMAND_ON)
-					ad.setValue(self.triggerHvacTempCeiling)
-				elif data.getValue() < self.triggerHvacTempFloor:
-					ad.setCommand(ConfigConst.COMMAND_ON)
-					ad.setValue(self.triggerHvacTempFloor)
-				else:
-					ad.setCommand(ConfigConst.COMMAND_OFF)
+			if data.getValue() > self.triggerHvacTempCeiling:
+				ad.setCommand(ConfigConst.COMMAND_ON)
+				ad.setValue(self.triggerHvacTempCeiling)
+			elif data.getValue() < self.triggerHvacTempFloor:
+				ad.setCommand(ConfigConst.COMMAND_ON)
+				ad.setValue(self.triggerHvacTempFloor)
+			else:
+				ad.setCommand(ConfigConst.COMMAND_OFF)
 
-				# NOTE: ActuatorAdapterManager and its associated actuator
-				# task implementations contain logic to avoid processing
-				# duplicative actuator commands - for the purposes
-				# of this exercise, the logic for filtering commands is
-				# left to ActuatorAdapterManager and its associated actuator
-				# task implementations, and not this function
-				self.handleActuatorCommandMessage(ad)
+			# NOTE: ActuatorAdapterManager and its associated actuator
+			# task implementations contain logic to avoid processing
+			# duplicative actuator commands - for the purposes
+			# of this exercise, the logic for filtering commands is
+			# left to ActuatorAdapterManager and its associated actuator
+			# task implementations, and not this function
+			self.handleActuatorCommandMessage(ad)
 		
 	def _handleUpstreamTransmission(self, resourceName: ResourceNameEnum, msg: str):
 		"""
@@ -236,53 +289,3 @@ class DeviceDataManager(IDataMessageListener):
 		2) Act on msg: If # 1 is true, send message upstream using one (or both) client connections.
 		"""
 		pass
-
-	def handleActuatorCommandMessage(self, data: ActuatorData = None) -> ActuatorData:
-		logging.info("Actuator data: " + str(data))
-
-		if data:
-			logging.info("Processing actuator command message.")
-			return self.actuatorAdapterMgr.sendActuatorCommand(data)
-		else:
-			logging.warning("Incoming actuator command is invalid (null). Ignoring.")
-			return None
-
-	def handleActuatorCommandResponse(self, data: ActuatorData = None) -> bool:
-		if data:
-			logging.debug("Incoming actuator response received (from actuator manager): " + str(data))
-
-			# store the data in the cache
-			self.actuatorResponseCache[data.getName()] = data
-
-			# convert ActuatorData to JSON and get the msg resource
-			actuatorMsg = DataUtil().actuatorDataToJson(data)
-			resourceName = ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE
-
-			# delegate to the transmit function any potential upstream comm's
-			self._handleUpstreamTransmission(resource = resourceName, msg = actuatorMsg)
-
-			return True
-		else:
-			logging.warning("Incoming actuator response is invalid (null). Ignoring.")
-
-			return False
-
-	def handleIncomingMessage(self, resourceEnum: ResourceNameEnum, msg: str) -> bool:
-		pass
-
-	def handleSensorMessage(self, data: SensorData = None) -> bool:
-		if data:
-			logging.debug("Incoming sensor data received (from sensor manager): " + str(data))
-			self._handleSensorDataAnalysis(data)
-			return True
-		else:
-			logging.warning("Incoming sensor data is invalid (null). Ignoring.")
-			return False
-
-	def handleSystemPerformanceMessage(self, data: SystemPerformanceData = None) -> bool:
-		if data:
-			logging.debug("Incoming system performance message received (from sys perf manager): " + str(data))
-			return True
-		else:
-			logging.warning("Incoming system performance data is invalid (null). Ignoring.")
-			return False

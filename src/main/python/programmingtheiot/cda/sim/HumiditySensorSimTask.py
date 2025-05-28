@@ -8,6 +8,7 @@
 #
 
 import logging
+
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.cda.sim.BaseSensorSimTask import BaseSensorSimTask
@@ -21,7 +22,10 @@ class HumiditySensorSimTask(BaseSensorSimTask):
 	
 	"""
 
-	def __init__(self, dataSet = None):
+	def __init__(self, dataSet: SensorDataGenerator = None):
+		"""
+		Constructor.
+		"""
 		super( \
 			HumiditySensorSimTask, self).__init__( \
 				name = ConfigConst.HUMIDITY_SENSOR_NAME, \
@@ -29,3 +33,4 @@ class HumiditySensorSimTask(BaseSensorSimTask):
 				dataSet = dataSet, \
 				minVal = SensorDataGenerator.LOW_NORMAL_ENV_HUMIDITY, \
 				maxVal = SensorDataGenerator.HI_NORMAL_ENV_HUMIDITY)
+	

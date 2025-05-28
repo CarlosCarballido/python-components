@@ -22,8 +22,8 @@ class BaseSensorSimTask():
 	
 	"""
 
-	DEFAULT_MIN_VAL = 0.0
-	DEFAULT_MAX_VAL = 1000.0
+	DEFAULT_MIN_VAL = ConfigConst.DEFAULT_VAL
+	DEFAULT_MAX_VAL = 100.0
 	
 	def __init__(self, name: str = ConfigConst.NOT_SET, 
 			  typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE, 
@@ -60,13 +60,10 @@ class BaseSensorSimTask():
 			sensorVal = self.dataSet.getDataEntry(index=self.dataSetIndex)
 			self.dataSetIndex = self.dataSetIndex+1
 
-			# FIXME este if es anidado?
 			if self.dataSetIndex >= self.dataSet.getDataEntryCount() - 1:
 				self.dataSetIndex = 0
 
-		# TODO esto va dentro o fuera del if??
 		sensorData.setValue(sensorVal)
-
 		self.latestSensorData = sensorData
 
 		return self.latestSensorData

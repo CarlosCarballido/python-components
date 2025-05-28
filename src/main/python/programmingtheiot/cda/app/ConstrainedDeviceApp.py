@@ -22,31 +22,55 @@ from programmingtheiot.cda.app.DeviceDataManager import DeviceDataManager
 logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 
 class ConstrainedDeviceApp():
+	"""
+	Definition of the ConstrainedDeviceApp class.
+	
+	"""
+	
 	def __init__(self):
+		"""
+		Initialization of class.
+		
+		@param path The name of the resource to apply to the URI.
+		"""
 		logging.info("Initializing CDA...")
 
 		self.dataMgr = DeviceDataManager()
+		
 
 	def startApp(self):
+		"""
+		Start the CDA. Calls startManager() on the device data manager instance.
+		
+		"""
 		logging.info("Starting CDA...")
-
+		
 		self.dataMgr.startManager()
 
 		logging.info("CDA started.")
 
 	def stopApp(self, code: int):
+		"""
+		Stop the CDA. Calls stopManager() on the device data manager instance.
+		
+		"""
 		logging.info("CDA stopping...")
-
+		
 		self.dataMgr.stopManager()
-
+		
 		logging.info("CDA stopped with exit code %s.", str(code))
 
 def main():
+	"""
+	Main function definition for running client as application.
+	
+	Current implementation runs for 65 seconds then exits.
+	"""
 	cda = ConstrainedDeviceApp()
 	cda.startApp()
-
+	
 	runForever = ConfigUtil().getBoolean(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.RUN_FOREVER_KEY)
-
+	
 	if runForever:
 		while (True):
 			sleep(5)
@@ -57,4 +81,9 @@ def main():
 		cda.stopApp(0)
 
 if __name__ == '__main__':
+	"""
+	Attribute definition for when invoking as app via command line
+	
+	"""
 	main()
+	

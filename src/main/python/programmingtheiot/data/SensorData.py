@@ -21,15 +21,7 @@ class SensorData(BaseIotData):
 		super(SensorData, self).__init__(name = name, typeID = typeID, d = d)
 
 		self.value = ConfigConst.DEFAULT_VAL
-	
-	def getSensorType(self) -> int:
-		"""
-		Returns the sensor type to the caller.
-		
-		@return int
-		"""
-		return self.sensorType
-	
+
 	def getValue(self) -> float:
 		return self.value
 
