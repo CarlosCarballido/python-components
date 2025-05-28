@@ -17,6 +17,11 @@ from programmingtheiot.cda.sim.BaseSensorSimTask import BaseSensorSimTask
 from pisense import SenseHAT
 
 class HumiditySensorEmulatorTask(BaseSensorSimTask):
+	"""
+	Shell representation of class for student implementation.
+	
+	"""
+
 	def __init__(self):
 		super( \
 			HumiditySensorEmulatorTask, self).__init__( \
@@ -28,7 +33,7 @@ class HumiditySensorEmulatorTask(BaseSensorSimTask):
 				ConfigConst.CONSTRAINED_DEVICE, ConfigConst.ENABLE_EMULATOR_KEY)
 
 		self.sh = SenseHAT(emulate = enableEmulation)
-
+	
 	def generateTelemetry(self) -> SensorData:
 		sensorData = SensorData(name = self.getName(), typeID = self.getTypeID())
 		sensorVal = self.sh.environ.humidity

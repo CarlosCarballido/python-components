@@ -6,7 +6,6 @@
 # 
 # Copyright (c) 2020 by Andrew D. King
 # 
-
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.ActuatorData import ActuatorData
@@ -28,3 +27,4 @@ class HumidifierActuatorSimTask(BaseActuatorSimTask):
 				name = ConfigConst.HUMIDIFIER_ACTUATOR_NAME, \
 				typeID = ConfigConst.HUMIDIFIER_ACTUATOR_TYPE, \
 				simpleName = "HUMIDIFIER")
+		
