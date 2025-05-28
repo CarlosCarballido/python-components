@@ -42,7 +42,7 @@ class DataIntegrationTest(unittest.TestCase):
 		self.dataUtil = DataUtil(encodeToUtf8)
 
 		self.cdaDataPath = ConfigUtil().getProperty(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TEST_CDA_DATA_PATH_KEY)
-		self.gdaDataPath = ConfigUtil().getProperty(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TEST_CDA_DATA_PATH_KEY)
+		self.gdaDataPath = ConfigUtil().getProperty(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TEST_GDA_DATA_PATH_KEY)
 		
 		if not os.path.exists(self.cdaDataPath):
 			logging.info("================================================")

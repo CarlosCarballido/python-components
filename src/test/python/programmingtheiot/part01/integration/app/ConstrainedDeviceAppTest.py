@@ -9,6 +9,7 @@
 
 import logging
 import unittest
+from time import sleep
 
 from programmingtheiot.cda.app.ConstrainedDeviceApp import ConstrainedDeviceApp
 
