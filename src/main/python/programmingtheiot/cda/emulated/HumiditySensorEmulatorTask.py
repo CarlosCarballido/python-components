@@ -22,7 +22,7 @@ class HumiditySensorEmulatorTask(BaseSensorSimTask):
 	
 	"""
 
-	def __init__(self, emulate=True):
+	def __init__(self):
 		super( \
 			HumiditySensorEmulatorTask, self).__init__( \
 				name = ConfigConst.HUMIDITY_SENSOR_NAME, \
@@ -32,7 +32,7 @@ class HumiditySensorEmulatorTask(BaseSensorSimTask):
 			ConfigUtil().getBoolean( \
 				ConfigConst.CONSTRAINED_DEVICE, ConfigConst.ENABLE_EMULATOR_KEY)
 
-		self.sh = SenseHAT(emulate=emulate)
+		self.sh = SenseHAT(emulate = enableEmulation)
 	
 	def generateTelemetry(self) -> SensorData:
 		sensorData = SensorData(name = self.getName(), typeID = self.getTypeID())
