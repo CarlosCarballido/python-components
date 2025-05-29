@@ -1,12 +1,3 @@
-#####
-# 
-# This class is part of the Programming the Internet of Things project.
-# 
-# It is provided as a simple shell to guide the student and assist with
-# implementation for the Programming the Internet of Things exercises,
-# and designed to be modified by the student as needed.
-#
-
 import logging
 
 from importlib import import_module
@@ -22,6 +13,7 @@ from programmingtheiot.cda.sim.SensorDataGenerator import SensorDataGenerator
 from programmingtheiot.cda.sim.HumiditySensorSimTask import HumiditySensorSimTask
 from programmingtheiot.cda.sim.TemperatureSensorSimTask import TemperatureSensorSimTask
 from programmingtheiot.cda.sim.PressureSensorSimTask import PressureSensorSimTask
+from programmingtheiot.cda.sim.GasSensorSimTask import GasSensorSimTask
 
 class SensorAdapterManager(object):
 	"""
@@ -30,6 +22,7 @@ class SensorAdapterManager(object):
 	"""
 
 	def __init__(self):
+		
 		self.configUtil = ConfigUtil()
 
 		self.pollRate     = \
@@ -57,34 +50,42 @@ class SensorAdapterManager(object):
 		self.humidityAdapter = None
 		self.pressureAdapter = None
 		self.tempAdapter     = None
+		self.gasAdapter = None
 
 		# see PIOT-CDA-03-006 description for thoughts on the next line of code
 		self._initEnvironmentalSensorTasks()
 
+		
+
 	def handleTelemetry(self):
 		humidityData = self.humidityAdapter.generateTelemetry()
 		pressureData = self.pressureAdapter.generateTelemetry()
-		tempData = self.tempAdapter.generateTelemetry()
+		tempData     = self.tempAdapter.generateTelemetry()
+		gasData = self.gasAdapter.generateTelemetry() if self.gasAdapter else None
 
 		humidityData.setLocationID(self.locationID)
 		pressureData.setLocationID(self.locationID)
 		tempData.setLocationID(self.locationID)
+		if gasData:
+			gasData.setLocationID(self.locationID)
 
 		logging.debug('Generated humidity data: ' + str(humidityData))
 		logging.debug('Generated pressure data: ' + str(pressureData))
 		logging.debug('Generated temp data: ' + str(tempData))
+		logging.debug('Generated gas data: ' + str(gasData) if gasData else 'No gas data generated')
 
 		if self.dataMsgListener:
 			self.dataMsgListener.handleSensorMessage(humidityData)
 			self.dataMsgListener.handleSensorMessage(pressureData)
 			self.dataMsgListener.handleSensorMessage(tempData)
-
+			if gasData:
+				self.dataMsgListener.handleSensorMessage(gasData)
 		
-	def setDataMessageListener(self, listener: IDataMessageListener):
+	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
 		if listener:
 			self.dataMsgListener = listener
-
-	def startManager(self) -> bool:
+	
+	def startManager(self):
 		logging.info("Started SensorAdapterManager.")
 
 		if not self.scheduler.running:
@@ -94,7 +95,8 @@ class SensorAdapterManager(object):
 			logging.info("SensorAdapterManager scheduler already started. Ignoring.")
 			return False
 
-	def stopManager(self) -> bool:
+		
+	def stopManager(self):
 		logging.info("Stopped SensorAdapterManager.")
 
 		try:
@@ -103,10 +105,10 @@ class SensorAdapterManager(object):
 		except:
 			logging.info("SensorAdapterManager scheduler already stopped. Ignoring.")
 			return False
-		
+	
 	def _initEnvironmentalSensorTasks(self):
 		humidityFloor   = \
-			self.configUtil.getFloat( \
+		self.configUtil.getFloat( \
 				section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.HUMIDITY_SIM_FLOOR_KEY, defaultVal = SensorDataGenerator.LOW_NORMAL_ENV_HUMIDITY)
 		humidityCeiling = \
 			self.configUtil.getFloat( \
@@ -142,7 +144,7 @@ class SensorAdapterManager(object):
 			self.humidityAdapter = HumiditySensorSimTask(dataSet = humidityData)
 			self.pressureAdapter = PressureSensorSimTask(dataSet = pressureData)
 			self.tempAdapter     = TemperatureSensorSimTask(dataSet = tempData)
-
+			self.gasAdapter = GasSensorSimTask()
 		else:
 			heModule = import_module('programmingtheiot.cda.emulated.HumiditySensorEmulatorTask', 'HumiditySensorEmulatorTask')
 			heClazz = getattr(heModule, 'HumiditySensorEmulatorTask')
@@ -155,3 +157,7 @@ class SensorAdapterManager(object):
 			teModule = import_module('programmingtheiot.cda.emulated.TemperatureSensorEmulatorTask', 'TemperatureSensorEmulatorTask')
 			teClazz = getattr(teModule, 'TemperatureSensorEmulatorTask')
 			self.tempAdapter = teClazz()
+
+			geModule = import_module('programmingtheiot.cda.emulated.GasSensorEmulatorTask', 'GasSensorEmulatorTask')
+			geClazz = getattr(geModule, 'GasSensorEmulatorTask')
+			self.gasAdapter = geClazz()

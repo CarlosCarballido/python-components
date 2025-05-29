@@ -1,12 +1,3 @@
-#####
-# 
-# This class is part of the Programming the Internet of Things project.
-# 
-# It is provided as a simple shell to guide the student and assist with
-# implementation for the Programming the Internet of Things exercises,
-# and designed to be modified by the student as needed.
-#
-
 import logging
 
 from importlib import import_module
@@ -19,6 +10,8 @@ from programmingtheiot.data.ActuatorData import ActuatorData
 
 from programmingtheiot.cda.sim.HvacActuatorSimTask import HvacActuatorSimTask
 from programmingtheiot.cda.sim.HumidifierActuatorSimTask import HumidifierActuatorSimTask
+from programmingtheiot.cda.emulated.FanEmulatorTask import FanEmulatorTask
+
 
 class ActuatorAdapterManager(object):
 	"""
@@ -28,9 +21,7 @@ class ActuatorAdapterManager(object):
 	
 	def __init__(self, dataMsgListener: IDataMessageListener = None):
 		self.dataMsgListener = dataMsgListener
-
 		self.configUtil = ConfigUtil()
-
 		self.useSimulator = \
 			self.configUtil.getBoolean( \
 				section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.ENABLE_SIMULATOR_KEY)
@@ -47,10 +38,47 @@ class ActuatorAdapterManager(object):
 		self.humidifierActuator = None
 		self.hvacActuator       = None
 		self.ledDisplayActuator = None
+		self.fanActuator        = None
 
 		# see PIOT-CDA-03-007 description for thoughts on the next line of code
 		self._initEnvironmentalActuationTasks()
 
+		hvacModule=import_module('programmingtheiot.cda.emulated.HvacEmulatorTask','HvacEmulatorTask')
+		hveClazz=getattr(hvacModule ,'HvacEmulatorTask')
+		self.hvacAdapter=hveClazz()
+
+	
+	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
+		if listener:
+			self.dataMsgListener = listener
+	
+	def _initEnvironmentalActuationTasks(self):
+		if not self.useEmulator:
+			# load the environmental tasks for simulated actuation
+			self.humidifierActuator=HumidifierActuatorSimTask()
+
+			# create the HVAC actuator
+			self.hvacActuator=HvacActuatorSimTask()
+		else:
+			hueModule=import_module('programmingtheiot.cda.emulated.HumidifierEmulatorTask','HumidiferEmulatorTask')
+			hueClazz=getattr(hueModule,'HumidifierEmulatorTask')
+			self.humidifierActuator=hueClazz()
+
+		# create the HVAC actuator emulator
+		hveModule=import_module('programmingtheiot.cda.emulated.HvacEmulatorTask','HvacEmulatorTask')
+		hveClazz=getattr(hveModule,'HvacEmulatorTask')
+		self.hvacActuator=hveClazz()
+
+		# create the LED display actuator emulator
+		leDisplayModule=import_module('programmingtheiot.cda.emulated.LedDisplayEmulatorTask','LedDisplayEmulatorTask')
+		leClazz=getattr(leDisplayModule,'LedDisplayEmulatorTask')
+		self.ledDisplayActuator=leClazz()
+
+		# create the fan actuator emulator
+		fanModule = import_module('programmingtheiot.cda.emulated.FanEmulatorTask', 'FanEmulatorTask')
+		fanClazz = getattr(fanModule, 'FanEmulatorTask')
+		self.fanActuator = fanClazz()
+	
 	def sendActuatorCommand(self, data: ActuatorData) -> ActuatorData:
 		if data and not data.isResponseFlagEnabled():
 			# first check if the actuation event is destined for this device
@@ -67,6 +95,8 @@ class ActuatorAdapterManager(object):
 					responseData = self.hvacActuator.updateActuator(data)
 				elif aType == ConfigConst.LED_DISPLAY_ACTUATOR_TYPE and self.ledDisplayActuator:
 					responseData = self.ledDisplayActuator.updateActuator(data)
+				elif aType == ConfigConst.FAN_ACTUATOR_TYPE and self.fanActuator:
+					responseData = self.fanActuator.updateActuator(data)
 				else:
 					logging.warning("No valid actuator type. Ignoring actuation for type: %s", data.getTypeID())
 
@@ -81,29 +111,3 @@ class ActuatorAdapterManager(object):
 			logging.warning("Actuator request received. Message is empty or response. Ignoring.")
 
 		return None
-	
-	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
-		if listener:
-			self.dataMsgListener = listener
-
-	def _initEnvironmentalActuationTasks(self):
-		if not self.useEmulator:
-			# load the environmental tasks for simulated actuation
-			self.humidifierActuator=HumidifierActuatorSimTask()
-
-			# create the HVAC actuator
-			self.hvacActuator=HvacActuatorSimTask()
-		else:
-			hueModule=import_module('programmingtheiot.cda.emulated.HumidifierEmulatorTask','HumidiferEmulatorTask')
-			hueClazz=getattr(hueModule,'HumidifierEmulatorTask')
-			self.humidifierActuator=hueClazz()
-
-			# create the HVAC actuator emulator
-			hveModule=import_module('programmingtheiot.cda.emulated.HvacEmulatorTask','HvacEmulatorTask')
-			hveClazz=getattr(hveModule,'HvacEmulatorTask')
-			self.hvacActuator=hveClazz()
-
-			# create the LED display actuator emulator
-			leDisplayModule=import_module('programmingtheiot.cda.emulated.LedDisplayEmulatorTask','LedDisplayEmulatorTask')
-			leClazz=getattr(leDisplayModule,'LedDisplayEmulatorTask')
-			self.ledDisplayActuator=leClazz()

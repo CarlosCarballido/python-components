@@ -39,9 +39,7 @@ class HumidityEmulatorTaskTest(unittest.TestCase):
 	def setUpClass(self):
 		logging.basicConfig(format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 		logging.info("Testing HumidifierEmulatorTask class [using SenseHAT emulator]...")
-		self.huSimTask = HumiditySensorEmulatorTask(emulate=True)
-		self.hEmuTask = HumiditySensorEmulatorTask(emulate=True)
-
+		self.hEmuTask = HumiditySensorEmulatorTask()
 		
 	def setUp(self):
 		pass
