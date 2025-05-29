@@ -172,7 +172,15 @@ class DeviceDataManager(IDataMessageListener):
 		"""
 		pass
 	
-	def handleSensorMessage(self, data: SensorData = None) -> bool:
+	def handleSensorMessage(self, data: SensorData) -> bool:
+		"""
+		This callback method will be invoked by the sensor manager that just processed
+		a new sensor reading, which creates a new SensorData instance that will be
+		passed to this method.
+		
+		@param data The incoming SensorData message.
+		@return boolean
+		"""
 		if data:
 			logging.debug("Incoming sensor data received (from sensor manager): " + str(data))
 			self._handleSensorDataAnalysis(data)
@@ -181,7 +189,15 @@ class DeviceDataManager(IDataMessageListener):
 			logging.warning("Incoming sensor data is invalid (null). Ignoring.")
 			return False
 	
-	def handleSystemPerformanceMessage(self, data: SystemPerformanceData = None) -> bool:
+	def handleSystemPerformanceMessage(self, data: SystemPerformanceData) -> bool:
+		"""
+		This callback method will be invoked by the system performance manager that just
+		processed a new sensor reading, which creates a new SystemPerformanceData instance
+		that will be passed to this method.
+		
+		@param data The incoming SystemPerformanceData message.
+		@return boolean
+		"""
 		if data:
 			logging.debug("Incoming system performance message received (from sys perf manager): " + str(data))
 			return True
@@ -237,9 +253,12 @@ class DeviceDataManager(IDataMessageListener):
 		pass
 		
 	def _handleSensorDataAnalysis(self, resource = None, data: SensorData = None):
-		if data is None:
-        	# Opcional: print("Warning: data is None in _handleSensorDataAnalysis")
-			return
+		"""
+		Call this from handleSensorMessage() to determine if there's
+		any action to take on the message. Steps to take:
+		1) Check config: Is there a rule or flag that requires immediate processing of data?
+		2) Act on data: If # 1 is true, determine what - if any - action is required, and execute.
+		"""
 		if self.handleTempChangeOnDevice and data.getTypeID() == ConfigConst.TEMP_SENSOR_TYPE:
 			logging.info("Handle temp change: %s - type ID: %s", str(self.handleTempChangeOnDevice), str(data.getTypeID()))
 
