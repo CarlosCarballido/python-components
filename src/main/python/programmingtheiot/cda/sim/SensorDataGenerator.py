@@ -407,7 +407,7 @@ class SensorDataSet():
 		
 		@return int
 		"""
-		return self.dataEntries.size
+		return len(self.getDataEntries())
 	
 	def setTimeEntries(self, timeEntries):
 		"""

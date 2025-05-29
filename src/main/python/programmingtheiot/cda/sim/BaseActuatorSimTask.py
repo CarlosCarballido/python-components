@@ -36,8 +36,9 @@ class BaseActuatorSimTask():
 		"""
 		pass
 	
-	def getSimpleName(self) -> str:
-		pass
+	def getSimpleName(self):
+		return self.__class__.__name__
+
 	
 	def updateActuator(self, data: ActuatorData) -> bool:
 		"""

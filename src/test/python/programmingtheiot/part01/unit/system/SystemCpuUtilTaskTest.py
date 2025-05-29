@@ -35,10 +35,13 @@ class SystemCpuUtilTaskTest(unittest.TestCase):
 
 	def testGetTelemetryValue(self):
 		val = self.cpuUtilTask.getTelemetryValue()
-		
-		self.assertGreaterEqual(val, 0.0)
+		if val is not None:
+			self.assertGreaterEqual(val, 0.0)
+    	
+		else:
+			self.fail("getTelemetryValue() returned None")
+    	
 		logging.info("CPU utilization: %s", str(val))
-
 if __name__ == "__main__":
 	unittest.main()
 	

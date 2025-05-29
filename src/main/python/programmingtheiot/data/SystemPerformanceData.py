@@ -26,20 +26,14 @@ class SystemPerformanceData(BaseIotData):
 
 	def getCpuUtilization(self):
 		return self.cpuUtil
-	
+
 	def getMemoryUtilization(self):
 		return self.memUtil
 
 	def setCpuUtilization(self, cpuUtil):
 		self.cpuUtil = cpuUtil
 		self.updateTimeStamp()
-	
-	def setCpuUtilization(self, cpuUtil):
-		pass
-	
-	def setDiskUtilization(self, diskUtil):
-		pass
-	
+
 	def setMemoryUtilization(self, memUtil):
 		self.memUtil = memUtil
 		self.updateTimeStamp()

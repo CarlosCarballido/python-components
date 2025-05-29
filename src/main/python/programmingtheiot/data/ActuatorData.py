@@ -60,23 +60,4 @@ class ActuatorData(BaseIotData):
 			self.stateData = data.getStateData()
 			self.value = data.getValue()
 			self.isResponse = data.isResponseFlagEnabled()
-
-	def __str__(self):
-		# string representation
-		return super(ActuatorData, self).__str__() + \
-			", Command: " + str(self.command) + \
-			", StateData: " + str(self.stateData) + \
-			", Value: " + str(self.value) + \
-			", Response: " + str(self.isResponse)
-	
-
-if __name__ == "__main__":
-	# check str method
-	actuatorData = ActuatorData()
-	print(actuatorData)
-	actuatorData.setCommand(1)
-	actuatorData.setStateData("state")
-	actuatorData.setValue(1.0)
-	actuatorData.setAsResponse()
-	print(actuatorData)	
-		
+			
