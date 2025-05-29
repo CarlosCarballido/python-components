@@ -39,6 +39,7 @@ enableCrypt    = False
 [ConstrainedDevice]
 deviceLocationID = constraineddevice001
 enableEmulator   = True
+enableSimulator  = True
 enableSenseHAT   = True
 enableMqttClient = True
 enableCoapServer = True
@@ -50,12 +51,6 @@ pollCycleSecs    = 5
 testGdaDataPath  = /tmp/gda-data
 testCdaDataPath  = /tmp/cda-data
 testEmptyApp     = False
-enableSimulator = True
-
-# NOTE: Choose the values most appropriate for your implementation
-handleTempChangeOnDevice = True
-triggerHvacTempFloor     = 18.0
-triggerHvacTempCeiling   = 20.0
 
 # configurable limits for sensor simulation
 humiditySimFloor   =   35.0
@@ -64,6 +59,11 @@ pressureSimFloor   =  990.0
 pressureSimCeiling = 1010.0
 tempSimFloor       =   15.0
 tempSimCeiling     =   25.0
+
+# configurable limits for actuator triggers
+handleTempChangeOnDevice = True
+triggerHvacTempFloor     = 18.0
+triggerHvacTempCeiling   = 20.0
 
 # camera settings
 streamHostAddr      = 127.0.0.1
@@ -78,10 +78,3 @@ streamFps           =   30
 imageFileExt        = .png
 videoFileExt        = .avi
 minMotionPixelsDiff = 10000
-
-[SensorData]
-hSimFloor = 0.5
-
-[SystemPerformance]
-cpuUtilThreshold = 0.75
-memUtilThreshold = 0.80
