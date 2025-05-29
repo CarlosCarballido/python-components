@@ -29,18 +29,17 @@ class BaseActuatorSimTask():
 		self.simpleName = simpleName
 		self.lastKnownCommand = ConfigConst.DEFAULT_COMMAND
 		self.lastKnownValue = ConfigConst.DEFAULT_VAL
-		
+			
 	def getLatestActuatorResponse(self) -> ActuatorData:
 		"""
 		This can return the current ActuatorData response instance or a copy.
 		"""
 		pass
 	
-	def getSimpleName(self):
-		return self.__class__.__name__
-
+	def getSimpleName(self) -> str:
+		return self.name
 	
-	def updateActuator(self, data: ActuatorData) -> bool:
+	def updateActuator(self, data: ActuatorData) -> ActuatorData:
 		"""
 		NOTE: If 'data' is valid, the actuator-specific work can be delegated
 		as follows:
@@ -94,7 +93,7 @@ class BaseActuatorSimTask():
 				return actuatorResponse
 
 		return None
-			
+		
 	def _activateActuator(self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None) -> int:
 		"""
 		Implement basic logging. Actuator-specific functionality should be implemented by sub-class.
@@ -125,3 +124,4 @@ class BaseActuatorSimTask():
 		logging.info("Simulating %s actuator OFF: %s", self.name, msg)
 
 		return 0
+		

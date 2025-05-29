@@ -39,8 +39,9 @@ class HvacEmulatorTaskTest(unittest.TestCase):
 	def setUpClass(self):
 		logging.basicConfig(format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 		logging.info("Testing HvacEmulatorTask class [using SenseHAT emulator]...")
-		self.hvSimTask = HvacEmulatorTask()
-		
+		self.hvSimTask = HvacEmulatorTask(emulate=True)
+
+			
 	def setUp(self):
 		pass
 

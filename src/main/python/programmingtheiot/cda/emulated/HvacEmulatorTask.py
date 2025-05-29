@@ -37,6 +37,7 @@ class HvacEmulatorTask(BaseActuatorSimTask):
 
 		self.sh = SenseHAT(emulate = enableEmulation)
 
+
 	def _activateActuator(self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None) -> int:
 		if self.sh.screen:
 			msg = self.getSimpleName() + ' ON: ' + str(val) + 'C'

@@ -19,6 +19,11 @@ from programmingtheiot.cda.sim.BaseActuatorSimTask import BaseActuatorSimTask
 from pisense import SenseHAT
 
 class HumidifierEmulatorTask(BaseActuatorSimTask):
+	"""
+	Shell representation of class for student implementation.
+	
+	"""
+
 	def __init__(self):
 		super( \
 			HumidifierEmulatorTask, self).__init__( \
@@ -54,3 +59,4 @@ class HumidifierEmulatorTask(BaseActuatorSimTask):
 		else:
 			logging.warning("No SenseHAT LED screen instance to clear / close.")
 			return -1
+		

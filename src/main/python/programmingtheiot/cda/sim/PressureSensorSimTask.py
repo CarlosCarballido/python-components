@@ -8,7 +8,6 @@
 #
 
 import logging
-
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.cda.sim.BaseSensorSimTask import BaseSensorSimTask
